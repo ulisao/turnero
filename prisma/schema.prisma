@@ -1,0 +1,47 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("POSTGRES_PRISMA_URL") // uses connection pooling
+  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+}
+
+model User {
+  id            String        @id @default(cuid())
+  name          String?
+  email         String        @unique
+  password      String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  reservations  Reservation[]
+}
+
+model Field {
+  id            String        @id @default(cuid())
+  name          String
+  size          Int
+  pricePerHour  Float
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  reservations  Reservation[]
+}
+
+model Reservation {
+  id        String   @id @default(cuid())
+  date      DateTime
+  startTime String
+  endTime   String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  field     Field    @relation(fields: [fieldId], references: [id])
+  fieldId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([date, startTime, fieldId])
+}
